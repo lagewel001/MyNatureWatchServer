@@ -7,6 +7,7 @@ import io
 import json
 import numpy as np
 import os
+import RPi.GPIO as GPIO
 try:
     import picamera
     import picamera.array
@@ -50,6 +51,12 @@ class CameraController(threading.Thread):
 
         self.camera = None
         self.rotated_camera = False
+
+        self.camera_mode = self.config["camera_mode"]
+        self.camera_mode_pin = 40
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(self.camera_mode_pin, GPIO.OUT)
+        GPIO.output(self.camera_mode_pin, GPIO.HIGH if self.camera_mode == 0 else GPIO.LOW)
 
         if picamera_exists:
             # Use pi camera
@@ -267,6 +274,18 @@ class CameraController(threading.Thread):
                 module_path = os.path.abspath(os.path.dirname(__file__))
                 self.config = self.update_config(new_config,
                                                  os.path.join(module_path, self.config["data_path"], 'config.json'))
+
+    # Set camera mode (day/night)
+    def set_camera_mode(self, mode):
+        if self.camera_mode != mode:
+            self.camera_mode = mode
+            # HIGH = IR cut filter off (day); LOW = IR cut filter on (night)
+            GPIO.output(self.camera_mode_pin, GPIO.HIGH if self.camera_mode == 0 else GPIO.LOW)
+            new_config = self.config
+            new_config["camera_mode"] = self.camera_mode
+            module_path = os.path.abspath(os.path.dirname(__file__))
+            self.config = self.update_config(new_config,
+                                             os.path.join(module_path, self.config["data_path"], 'config.json'))
 
     # Set picamera exposure
     def set_exposure(self, shutter_speed, iso):

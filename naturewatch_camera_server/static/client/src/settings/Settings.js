@@ -3,6 +3,7 @@ import axios from 'axios';
 import {Button, Collapse, Accordion, Card} from 'react-bootstrap';
 import SensitivitySetting from './SensitivitySetting';
 import ExposureSetting from './ExposureSetting';
+import CameraModeSetting from './CameraModeSetting';
 import PropTypes from "prop-types";
 
 class Settings extends React.Component {
@@ -14,6 +15,7 @@ class Settings extends React.Component {
         this.onShutterChange = this.onShutterChange.bind(this);
         this.onShutterChangeEnd = this.onShutterChangeEnd.bind(this);
         this.onModeChange = this.onModeChange.bind(this);
+        this.onCameraModeChange = this.onCameraModeChange.bind(this);
 
         this.state = {
             isOpen: false,
@@ -24,7 +26,8 @@ class Settings extends React.Component {
                     iso: "",
                     shutter_speed: ""
                 },
-                sensitivity: ""
+                sensitivity: "",
+                camera_mode: null
             }
         };
     }
@@ -135,6 +138,17 @@ class Settings extends React.Component {
         });
     }
 
+    onCameraModeChange(value) {
+        let currentSettings = this.state.settings;
+        currentSettings.camera_mode = parseInt(value);
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            console.log("INFO: Changed camera mode.");
+            this.postSettings();
+        });
+    }
+
     render() {
         return (
             <div className="settings">
@@ -189,6 +203,19 @@ class Settings extends React.Component {
                                         onShutterChange={this.onShutterChange}
                                         onShutterChangeEnd={this.onShutterChangeEnd}
                                         onModeChange={this.onModeChange}
+                                    />
+                                </Card.Body>
+                            </Accordion.Collapse>
+                        </Card>
+                        <Card>
+                            <Accordion.Toggle as={Card.Header} eventKey={0}>
+                                Camera Mode
+                            </Accordion.Toggle>
+                            <Accordion.Collapse eventKey={0}>
+                                <Card.Body>
+                                    <CameraModeSetting
+                                        onValueChange={this.onCameraModeChange()}
+                                        value={this.state.settings.camera_mode}
                                     />
                                 </Card.Body>
                             </Accordion.Collapse>

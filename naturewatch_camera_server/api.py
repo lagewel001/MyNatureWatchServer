@@ -96,6 +96,9 @@ def settings_handler():
                     settings["exposure"]["shutter_speed"] = 5000
                 current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
                                                            settings["exposure"]["iso"])
+        if "camera_mode" in settings:
+            current_app.camera_controller.set_camera_mode(settings["camera_mode"])
+
         new_settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
         return Response(json.dumps(new_settings), mimetype='application/json')
 
@@ -123,7 +126,8 @@ def construct_settings_object(camera_controller, change_detector):
             "iso": camera_controller.get_iso(),
             "shutter_speed": camera_controller.get_shutter_speed(),
         },
-        "sensitivity": sensitivity
+        "sensitivity": sensitivity,
+        "camera_mode": camera_controller.camera_mode
     }
     return settings
 
